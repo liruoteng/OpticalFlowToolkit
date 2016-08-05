@@ -12,10 +12,9 @@ according to Andreas Geiger [].
 ### File description:
 =================
 
-- flow_read.py     : read flow .png file 
-- flow_write.py    : write flow into .png file, same format as KITTI benchmark
-- flow_visual.py   : visualize optical flow into YCbCr mode or RGB mode.
-- flow_error.py    : calculate estimated flow error according to ground truth
+- kittitool.py     : toolkit for KITTI optical flow dataset
+- demo.py          : demonstration on read and visualize KITTI optical flow data
+- flowlib.py       : library for manipulate optical flow
 ...
 
 
@@ -23,7 +22,8 @@ according to Andreas Geiger [].
 
 1. Python2.7
 2. Numpy and Scipy
-3. pypng package
+3. Matplotlib
+4. pypng package
 
 
 ### 2. Installation:
@@ -40,7 +40,12 @@ sudo pip install scipy
 sudo pip install numpy
 ```
 
-#### 2.3 Install PyPng
+#### 2.3 Install Matplotlib
+```
+pip install matplotlib
+```
+
+#### 2.4 Install PyPng
 ```
 sudo pip install pypng
 ```
