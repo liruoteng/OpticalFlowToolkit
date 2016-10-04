@@ -1,21 +1,33 @@
 #!/usr/bin/python
+# library for optical flow processing
+# Author: Ruoteng Li
+# Date: 6th Aug 2016
 import numpy as np
 import matplotlib.pyplot as plt
 UNKNOWN_FLOW_THRESH = 1e7
 
 
-# Calculate flow end point error
 def evaluate_flow(gt, pred):
+    """
+    evaluate the estimated optical flow end point error according to ground truth provided
+    :param gt: ground truth file path
+    :param pred: estimated optical flow file path
+    :return: end point error, float32
+    """
     # Read flow files and calculate the errors
     gt_flow = read_flow(gt)        # ground truth flow
     eva_flow = read_flow(pred)     # predicted flow
     # Calculate errors
-    average_pe = flowAngErr(gt_flow[:, :, 0], gt_flow[:, :, 1], eva_flow[:, :, 0], eva_flow[:, :, 1])
+    average_pe = flow_error(gt_flow[:, :, 0], gt_flow[:, :, 1], eva_flow[:, :, 0], eva_flow[:, :, 1])
     return average_pe
 
 
-# show flow file visualization
 def show_flow(filename):
+    """
+    visualize optical flow map using matplotlib
+    :param filename: optical flow file
+    :return: None
+    """
     flow = read_flow(filename)
     img = flow_to_image(flow)
     plt.imshow(img)
@@ -24,6 +36,11 @@ def show_flow(filename):
 
 # WARNING: this will work on little-endian architectures (eg Intel x86) only!
 def read_flow(filename):
+    """
+    read optical flow in Middlebury .flo file format
+    :param filename:
+    :return:
+    """
     f = open(filename, 'rb')
     magic = np.fromfile(f, np.float32, count=1)
     data2d = None
@@ -41,8 +58,37 @@ def read_flow(filename):
     return data2d
 
 
-# Calculate average end point error
-def flowAngErr(tu, tv, u, v):
+# WARNING: this will work on little-endian architectures only!
+def write_flow(flow, filename):
+    """
+    write optical flow in Middlebury .flo format
+    :param flow: optical flow map
+    :param filename: optical flow file path to be saved
+    :return: None
+    """
+    f = open(filename, 'wb')
+    magic = np.array([202021.25], dtype=np.float32)
+    (height, width) = flow.shape
+    w = np.array([width], dtype=np.int32)
+    h = np.array([height], dtype=np.int32)
+    empty_map = np.zeros((height, width), dtype=np.float32)
+    data = np.dstack((flow, empty_map))
+    magic.tofile(f)
+    w.tofile(f)
+    h.tofile(f)
+    data.tofile(f)
+    f.close()
+
+
+def flow_error(tu, tv, u, v):
+    """
+    Calculate average end point error
+    :param tu: ground-truth horizontal flow map
+    :param tv: ground-truth vertical flow map
+    :param u:  estimated horizontal flow map
+    :param v:  estimated vertical flow map
+    :return: End point error of the estimated flow
+    """
     smallflow = 0.0
     '''
     stu = tu[bord+1:end-bord,bord+1:end-bord]
@@ -89,12 +135,11 @@ def flowAngErr(tu, tv, u, v):
     return mepe
 
 
-# Convert flow into middlebury color code image
 def flow_to_image(flow):
     """
-
-    :param flow:
-    :return:
+    Convert flow into middlebury color code image
+    :param flow: optical flow map
+    :return: optical flow image in middlebury color
     """
     u = flow[:, :, 0]
     v = flow[:, :, 1]
@@ -130,7 +175,13 @@ def flow_to_image(flow):
     return np.uint8(img)
 
 
-def compute_color(u,v):
+def compute_color(u, v):
+    """
+    compute optical flow color map
+    :param u: optical flow horizontal map
+    :param v: optical flow vertical map
+    :return: optical flow in color code
+    """
     [h, w] = u.shape
     img = np.zeros([h, w, 3])
     nanIdx = np.isnan(u) | np.isnan(v)
@@ -169,6 +220,10 @@ def compute_color(u,v):
 
 
 def make_color_wheel():
+    """
+    Generate color wheel according Middlebury color code
+    :return: Color wheel
+    """
     RY = 15
     YG = 6
     GC = 4
@@ -214,12 +269,16 @@ def make_color_wheel():
     return colorwheel
 
 
-def image_adjust(img, sz):
+def scale_image(image, new_range):
     """
-    Adjust image to size
-    :param img: array of image to be resized
-    :param sz: tuple value (H,W) height x width
-    :return: adjusted image
+    Linearly scale the image into desired range
+    :param image: input image
+    :param new_range: the new range to be aligned
+    :return: image normalized in new range
     """
-    from scipy import misc as mc
-    return mc.imresize(img, size=sz)
+    min_val = np.min(image).astype(np.float32)
+    max_val = np.max(image).astype(np.float32)
+    min_val_new = np.array(min(new_range), dtype=np.float32)
+    max_val_new = np.array(max(new_range), dtype=np.float32)
+    scaled_image = (image - min_val) / (max_val - min_val) * (max_val_new - min_val_new) + min_val_new
+    return scaled_image.astype(np.uint8)
