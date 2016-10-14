@@ -4,7 +4,11 @@
 # Date: 6th Aug 2016
 import numpy as np
 import matplotlib.pyplot as plt
+import png
+import pfm
 UNKNOWN_FLOW_THRESH = 1e7
+SMALLFLOW = 0.0
+LARGEFLOW = 1e8
 
 
 def evaluate_flow(gt, pred):
@@ -56,28 +60,6 @@ def read_flow(filename):
         data2d = np.resize(data2d, (h, w, 2))
     f.close()
     return data2d
-
-
-# WARNING: this will work on little-endian architectures only!
-def write_flow(flow, filename):
-    """
-    write optical flow in Middlebury .flo format
-    :param flow: optical flow map
-    :param filename: optical flow file path to be saved
-    :return: None
-    """
-    f = open(filename, 'wb')
-    magic = np.array([202021.25], dtype=np.float32)
-    (height, width) = flow.shape
-    w = np.array([width], dtype=np.int32)
-    h = np.array([height], dtype=np.int32)
-    empty_map = np.zeros((height, width), dtype=np.float32)
-    data = np.dstack((flow, empty_map))
-    magic.tofile(f)
-    w.tofile(f)
-    h.tofile(f)
-    data.tofile(f)
-    f.close()
 
 
 def flow_error(tu, tv, u, v):
@@ -269,6 +251,40 @@ def make_color_wheel():
     return colorwheel
 
 
+def disp_to_flow(disp, filename):
+    f = open(filename, 'wb')
+    magic = np.array([202021.25], dtype=np.float32)
+    (height, width) = disp.shape[0:2]
+    w = np.array([width], dtype=np.int32)
+    h = np.array([height], dtype=np.int32)
+    empty_map = np.zeros((height, width), dtype=np.float32)
+    data = np.dstack((disp, empty_map))
+    magic.tofile(f)
+    w.tofile(f)
+    h.tofile(f)
+    data.tofile(f)
+    f.close()
+
+
+def write_flow(flow, filename):
+    """
+    write optical flow in Middlebury .flo format
+    :param flow: optical flow map
+    :param filename: optical flow file path to be saved
+    :return: None
+    """
+    f = open(filename, 'wb')
+    magic = np.array([202021.25], dtype=np.float32)
+    (height, width) = flow.shape[0:2]
+    w = np.array([width], dtype=np.int32)
+    h = np.array([height], dtype=np.int32)
+    magic.tofile(f)
+    w.tofile(f)
+    h.tofile(f)
+    flow.tofile(f)
+    f.close()
+
+
 def scale_image(image, new_range):
     """
     Linearly scale the image into desired range
@@ -282,3 +298,69 @@ def scale_image(image, new_range):
     max_val_new = np.array(max(new_range), dtype=np.float32)
     scaled_image = (image - min_val) / (max_val - min_val) * (max_val_new - min_val_new) + min_val_new
     return scaled_image.astype(np.uint8)
+
+
+def read_png(flow_file):
+    """
+    Read kitti flow from .png file
+    :param flow_file:
+    :return:
+    """
+    image_object = png.Reader(filename=flow_file)
+    image_direct = image_object.asDirect()
+    image_data = list(image_direct[2])
+    (w, h) = image_direct[3]['size']
+    channel = len(image_data[0]) / w
+    flow = np.zeros((h, w, channel), dtype=np.uint16)
+    for i in range(len(image_data)):
+        for j in range(channel):
+            flow[i, :, j] = image_data[i][j::channel]
+    return flow[:, :, 0] / 256
+
+
+def read_pfm(flow_file):
+    import pfm
+    (data, scale) = pfm.readPFM(flow_file)
+    return data
+
+
+def pfm_to_flo(pfm_file):
+    flow_filename = pfm_file[0:pfm_file.find('.pfm')] + '.flo'
+    (data, scale) = pfm.readPFM(pfm_file)
+    flow = data[:, :, 0:2]
+    write_flow(flow, flow_filename)
+
+
+def flow_to_segment(flow):
+    h = flow.shape[0]
+    w = flow.shape[1]
+    u = flow[:, :, 0]
+    v = flow[:, :, 1]
+
+    idx = ((abs(u) > LARGEFLOW) | (abs(v) > LARGEFLOW))
+    idx2 = (abs(u) == SMALLFLOW)
+    u[idx2] = 0.0001
+    tan_value = v / u
+
+    class1 = (tan_value < 1) & (tan_value >= 0) & (u > 0) & (v >= 0)
+    class2 = (tan_value >= 1) & (u >= 0) & (v >= 0)
+    class3 = (tan_value < -1) & (u <= 0) & (v >= 0)
+    class4 = (tan_value < 0) & (tan_value >= -1) & (u < 0) & (v >= 0)
+    class8 = (tan_value >= -1) & (tan_value < 0) & (u > 0) & (v <= 0)
+    class7 = (tan_value < -1) & (u >= 0) & (v <= 0)
+    class6 = (tan_value >= 1) & (u <= 0) & (v <= 0)
+    class5 = (tan_value >= 0) & (tan_value < 1) & (u < 0) & (v <= 0)
+
+    seg = np.zeros((h, w))
+
+    seg[class1] = 1
+    seg[class2] = 2
+    seg[class3] = 3
+    seg[class4] = 4
+    seg[class5] = 5
+    seg[class6] = 6
+    seg[class7] = 7
+    seg[class8] = 8
+    seg[idx] = 0
+
+    return seg
