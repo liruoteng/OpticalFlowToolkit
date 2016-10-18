@@ -21,6 +21,7 @@ if not args.input_dir:
     in_dir = './'
 else:
     in_dir = os.path.abspath(args.input_dir)
+
 if args.output_dir:
     output_file_path = os.path.join(args.output_dir, 'filelist.txt')
 else:

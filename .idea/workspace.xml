@@ -2,18 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="cbca970b-12e2-4e75-9663-71268ce7da60" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/create_flow_list.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/lib/__init__.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/lib/stats.py" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/data/frame_0036.flo" afterPath="" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/data/flow10.flo" afterPath="$PROJECT_DIR$/data/flow_gt.flo" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/flowlib.py" afterPath="$PROJECT_DIR$/lib/flowlib.py" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/kittitool.py" afterPath="$PROJECT_DIR$/lib/kittitool.py" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/pfm.py" afterPath="$PROJECT_DIR$/lib/pfm.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/README.md" afterPath="$PROJECT_DIR$/README.md" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/classify_flow.py" afterPath="$PROJECT_DIR$/classify_flow.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/demo.py" afterPath="$PROJECT_DIR$/demo.py" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/classify_flow.py" afterPath="$PROJECT_DIR$/segment_flow.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/create_flow_list.py" afterPath="$PROJECT_DIR$/create_flow_list.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/lib/stats.py" afterPath="$PROJECT_DIR$/lib/stats.py" />
     </list>
     <ignored path="OpticalFlowToolkit.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -35,11 +26,11 @@
     <splitter split-orientation="horizontal" split-proportion="0.5">
       <split-first>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-          <file leaf-file-name="create_flow_list.py" pinned="false" current-in-tab="true">
+          <file leaf-file-name="create_flow_list.py" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/create_flow_list.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="648">
-                  <caret line="36" column="17" selection-start-line="36" selection-start-column="17" selection-end-line="36" selection-end-column="17" />
+                <state relative-caret-position="576">
+                  <caret line="32" column="57" selection-start-line="32" selection-start-column="57" selection-end-line="32" selection-end-column="57" />
                   <folding>
                     <element signature="e#224#233#0" expanded="true" />
                   </folding>
@@ -71,12 +62,14 @@
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="stats.py" pinned="false" current-in-tab="false">
+          <file leaf-file-name="stats.py" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/lib/stats.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="144">
-                  <caret line="8" column="0" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
-                  <folding />
+                <state relative-caret-position="540">
+                  <caret line="30" column="18" selection-start-line="30" selection-start-column="18" selection-end-line="30" selection-end-column="18" />
+                  <folding>
+                    <element signature="e#109#127#0" expanded="true" />
+                  </folding>
                 </state>
               </provider>
             </entry>
@@ -85,13 +78,13 @@
       </split-first>
       <split-second>
         <leaf>
-          <file leaf-file-name="classify_flow.py" pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/classify_flow.py">
+          <file leaf-file-name="segment_flow.py" pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/segment_flow.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="522">
-                  <caret line="29" column="22" selection-start-line="29" selection-start-column="22" selection-end-line="29" selection-end-column="22" />
+                <state relative-caret-position="576">
+                  <caret line="32" column="0" selection-start-line="32" selection-start-column="0" selection-end-line="32" selection-end-column="0" />
                   <folding>
-                    <element signature="e#181#199#0" expanded="true" />
+                    <element signature="e#180#189#0" expanded="true" />
                   </folding>
                 </state>
               </provider>
@@ -119,11 +112,12 @@
         <option value="$PROJECT_DIR$/demo.py" />
         <option value="$PROJECT_DIR$/README.md" />
         <option value="$PROJECT_DIR$/classify_flow.py" />
-        <option value="$PROJECT_DIR$/lib/stats.py" />
         <option value="$PROJECT_DIR$/lib/flowlib.py" />
         <option value="$PROJECT_DIR$/lib/kittitool.py" />
-        <option value="$PROJECT_DIR$/create_flow_list.py" />
         <option value="$PROJECT_DIR$/filelist.txt" />
+        <option value="$PROJECT_DIR$/lib/stats.py" />
+        <option value="$PROJECT_DIR$/create_flow_list.py" />
+        <option value="$PROJECT_DIR$/segment_flow.py" />
       </list>
     </option>
   </component>
@@ -234,7 +228,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="OpticalFlowToolkit" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/classify_flow.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/segment_flow.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <method />
@@ -426,7 +420,7 @@
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.22559242" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.23412323" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.21516588" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.21516588" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39905214" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
@@ -463,12 +457,12 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/classify_flow.py">
+    <entry file="file://$PROJECT_DIR$/segment_flow.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="648">
           <caret line="39" column="18" selection-start-line="39" selection-start-column="18" selection-end-line="39" selection-end-column="18" />
           <folding>
-            <element signature="e#181#199#0" expanded="true" />
+            <element signature="e#180#189#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -481,12 +475,12 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/classify_flow.py">
+    <entry file="file://$PROJECT_DIR$/segment_flow.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#181#199#0" expanded="true" />
+            <element signature="e#180#189#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -535,12 +529,12 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/classify_flow.py">
+    <entry file="file://$PROJECT_DIR$/segment_flow.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="270">
           <caret line="18" column="17" selection-start-line="18" selection-start-column="17" selection-end-line="18" selection-end-column="17" />
           <folding>
-            <element signature="e#181#199#0" expanded="true" />
+            <element signature="e#180#189#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -605,16 +599,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/classify_flow.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="522">
-          <caret line="29" column="22" selection-start-line="29" selection-start-column="22" selection-end-line="29" selection-end-column="22" />
-          <folding>
-            <element signature="e#181#199#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/lib/flowlib.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="36">
@@ -643,20 +627,32 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/stats.py">
+    <entry file="file://$PROJECT_DIR$/segment_flow.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="144">
-          <caret line="8" column="0" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
-          <folding />
+        <state relative-caret-position="576">
+          <caret line="32" column="0" selection-start-line="32" selection-start-column="0" selection-end-line="32" selection-end-column="0" />
+          <folding>
+            <element signature="e#180#189#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/create_flow_list.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="648">
-          <caret line="36" column="17" selection-start-line="36" selection-start-column="17" selection-end-line="36" selection-end-column="17" />
+        <state relative-caret-position="576">
+          <caret line="32" column="57" selection-start-line="32" selection-start-column="57" selection-end-line="32" selection-end-column="57" />
           <folding>
             <element signature="e#224#233#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/stats.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="540">
+          <caret line="30" column="18" selection-start-line="30" selection-start-column="18" selection-end-line="30" selection-end-column="18" />
+          <folding>
+            <element signature="e#109#127#0" expanded="true" />
           </folding>
         </state>
       </provider>
