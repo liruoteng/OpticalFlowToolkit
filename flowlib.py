@@ -339,7 +339,8 @@ def flow_to_segment(flow):
 
     idx = ((abs(u) > LARGEFLOW) | (abs(v) > LARGEFLOW))
     idx2 = (abs(u) == SMALLFLOW)
-    u[idx2] = 0.0001
+    class0 = (v == 0) & (u == 0)
+    u[idx2] = 0.00001
     tan_value = v / u
 
     class1 = (tan_value < 1) & (tan_value >= 0) & (u > 0) & (v >= 0)
@@ -361,6 +362,7 @@ def flow_to_segment(flow):
     seg[class6] = 6
     seg[class7] = 7
     seg[class8] = 8
+    seg[class0] = 0
     seg[idx] = 0
 
     return seg
