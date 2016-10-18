@@ -1,4 +1,4 @@
-# THE KITTI VISION BENCHMARK SUITE: STEREO AND OPTICAL FLOW BENCHMARK
+# OPTICAL FLOW TOOLKIT v0.1
 #### RUOTENG LI                                  
 #### 6th Aug 2016                                 
 
@@ -12,9 +12,9 @@ according to Andreas Geiger [].
 ### File description:
 =================
 
-- kittitool.py     : toolkit for KITTI optical flow dataset
+- lib/kittitool.py     : toolkit for KITTI optical flow dataset
 - demo.py          : demonstration on read and visualize KITTI optical flow data
-- flowlib.py       : library for manipulate optical flow
+- lib/flowlib.py       : library for manipulate optical flow
 ...
 
 

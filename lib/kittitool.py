@@ -1,19 +1,26 @@
 #! /usr/bin/python
+"""
+# ==============================
+# kittitool.py
+# this file provides read/write and visualize functions of optical flow files in kitti format
 # Author: Ruoteng Li
 # Date: 6th Aug 2016
+# ==============================
+"""
 
-import numpy as np
+
 import png
-import matplotlib.pyplot as plt
+import numpy as np
 import matplotlib.colors as cl
-import flowlib as fl
+import matplotlib.pyplot as plt
+from lib import flowlib as fl
 
 
 def flow_read(flow_file):
     """
     Read kitti flow from .png file
-    :param flow_file:
-    :return:
+    :param flow_file: the .png flow file path
+    :return: optical flow in array format
     """
     flow_object = png.Reader(filename=flow_file)
     flow_direct = flow_object.asDirect()
@@ -33,6 +40,12 @@ def flow_read(flow_file):
 
 
 def flow_visualize(flow, mode='Y'):
+    """
+    this function visualize the input flow
+    :param flow: input flow in array
+    :param mode: choose which color mode to visualize the flow (Y: Ccbcr, RGB: RGB color)
+    :return: None
+    """
     if mode == 'Y':
         # Ccbcr color wheel
         img = fl.flow_to_image(flow)
@@ -66,6 +79,6 @@ def flow_visualize(flow, mode='Y'):
         plt.imshow(img)
         plt.show()
 
-    return
+    return None
 
-
+# TODO: function flow_write(flow_file)

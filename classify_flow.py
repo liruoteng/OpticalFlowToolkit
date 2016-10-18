@@ -2,11 +2,12 @@
 """
 classify_flow.py
 This file convert flow file (.flo) into into flow class file according to the direction of the flow
+Author: Li Ruoteng
+Date: 16 Oct 2016
 """
 
-import os
 import numpy as np
-import flowlib as fl
+import os
 from PIL import Image
 
 full = 196608
@@ -36,5 +37,5 @@ for j in range(22276):
 
 
 for i in range(len(stats)):
-    stats[i] = stats[i] / 22276
+    stats[i] /= 22276
     print stats[i]

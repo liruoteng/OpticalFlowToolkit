@@ -1,11 +1,18 @@
 #!/usr/bin/python
+"""
+# ==============================
+# flowlib.py
 # library for optical flow processing
 # Author: Ruoteng Li
 # Date: 6th Aug 2016
-import numpy as np
-import matplotlib.pyplot as plt
+# ==============================
+"""
 import png
 import pfm
+import numpy as np
+import matplotlib.pyplot as plt
+
+
 UNKNOWN_FLOW_THRESH = 1e7
 SMALLFLOW = 0.0
 LARGEFLOW = 1e8
