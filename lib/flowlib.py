@@ -18,7 +18,7 @@ SMALLFLOW = 0.0
 LARGEFLOW = 1e8
 
 
-def evaluate_flow(gt, pred):
+def evaluate_flow_file(gt, pred):
     """
     evaluate the estimated optical flow end point error according to ground truth provided
     :param gt: ground truth file path
@@ -30,6 +30,15 @@ def evaluate_flow(gt, pred):
     eva_flow = read_flow(pred)     # predicted flow
     # Calculate errors
     average_pe = flow_error(gt_flow[:, :, 0], gt_flow[:, :, 1], eva_flow[:, :, 0], eva_flow[:, :, 1])
+    return average_pe
+
+
+def evaluate_flow(gt_flow, pred_flow):
+    """
+    gt: ground-truth flow
+    pred: estimated flow
+    """
+    average_pe = flow_error(gt_flow[:, :, 0], gt_flow[:, :, 1], pred_flow[:, :, 0], pred_flow[:, :, 1])
     return average_pe
 
 

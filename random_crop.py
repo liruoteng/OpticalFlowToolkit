@@ -12,22 +12,58 @@ import numpy as np
 from PIL import Image
 from lib import flowlib as fl
 
-parser = argparse.ArgumentParser(description='Crop optical flow and image pairs according to locations')
-parser.add_argument('input_dir', type=str, help="The directory to search for flow files")
-parser.add_argument('output_dir', type=str, help='the output directory')
-parser.add_argument('x', type=int, help='the top left point on the image to start the crop')
-parser.add_argument('y', type=int, help='the top left point on the image to start the crop')
-parser.add_argument('h', type=int, help='crop size')
-parser.add_argument('w', type=int, help='crop size')
-parser.add_argument('--image_format', type=str, help="The format of the image files")
-parser.add_argument('--flow_format', type=str, help="The format of the flow files")
-args = parser.parse_args()
+canvas_height = 540
+canvas_width = 960
+patch_height = 256
+patch_width = 256
 
-if not args.image_format:
-    args.image_format = '.png'
+f1 = open('data/cleaninput/img1_list.txt', 'r')
+f2 = open('data/cleaninput/img2_list.txt', 'r')
+f = open('data/cleaninput/flo_list.txt', 'r')
+g1 = open('img1_list.txt', 'wb')
+g2 = open('img2_list.txt', 'wb')
+g = open('flo_list.txt', 'wb')
+output_dir = 'out'
+if not os.path.exists(output_dir):
+    os.mkdir(output_dir)
+img1_input = f1.readlines()
+img2_input = f2.readlines()
+flow_input = f.readlines()
+length = len(flow_input)
 
-if not args.flow_format:
-    args.flow_format = '.flo'
+for i in range(600):
+    x_locations = np.random.randint(0, canvas_width - patch_width, size=10)
+    y_locations = np.random.randint(0, canvas_height - patch_height, size=10)
+    img1 = Image.open(img1_input[i].strip())
+    img2 = Image.open(img2_input[i].strip())
+    flow = fl.read_flow(flow_input[i].strip())
+    for (x, y) in zip(x_locations, y_locations):
+        patch_img1 = img1.crop((x, y, x+patch_width, y+patch_height))
+        patch_img2 = img2.crop((x,y,x+patch_width, y+patch_height))
+        patch_flow = flow[y:y+patch_height, x:x+patch_width]
+        filename = str.format('%05d_' % i) + str(x) + '_' + str(y)
+        path1 = os.path.join(output_dir, filename + '_img1.png')
+        path2 = os.path.join(output_dir, filename + '_img2.png')
+        flow_path = os.path.join(output_dir, filename + '.flo')
+        patch_img1.save(path1)
+        patch_img2.save(path2)
+        fl.write_flow(patch_flow, flow_path)
+        g1.write(path1 + '\n')
+        g2.write(path2 + '\n')
+        g.write(flow_path + '\n')
+
+f1.close()
+f2.close()
+f.close()
+g1.close()
+g2.close()
+g.close()
+
+
+
+
+'''
+
 file_list = []
 in_dir = os.path.abspath(args.input_dir)
 out_dir = os.path.abspath(args.output_dir)
@@ -57,3 +93,5 @@ for root, dirs, files in os.walk(in_dir):
                 if not os.path.exists(out_path):
                     os.makedirs(out_path)
                 new_img.save(os.path.join(out_path, filename))
+
+'''
