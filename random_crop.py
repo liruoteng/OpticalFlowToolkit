@@ -17,9 +17,9 @@ canvas_width = 960
 patch_height = 256
 patch_width = 256
 
-f1 = open('data/cleaninput/img1_list.txt', 'r')
-f2 = open('data/cleaninput/img2_list.txt', 'r')
-f = open('data/cleaninput/flo_list.txt', 'r')
+f1 = open('data/hazeinput/img1_list.txt', 'r')
+f2 = open('data/hazeinput/img2_list.txt', 'r')
+f = open('data/hazeinput/flo_list.txt', 'r')
 g1 = open('img1_list.txt', 'wb')
 g2 = open('img2_list.txt', 'wb')
 g = open('flo_list.txt', 'wb')
