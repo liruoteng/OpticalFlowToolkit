@@ -28,13 +28,16 @@ else:
     output_file_path = 'filelist.txt'
 f = open(output_file_path, 'wb')
 
-for file_name in os.listdir(in_dir):
-    if file_name.find(args.format) != -1:
-        file_list.append(os.path.join(in_dir, file_name))
+for root, dirs, files in os.walk(in_dir):
+    if files:
+        for file_name in files:
+            if file_name.find(args.format) != -1:
+                file_list.append(os.path.join(in_dir, root) + '/' + file_name)
 
 file_list.sort()
 for name in file_list:
-    f.write(name)
-    f.write('\n')
+    if name.find('0001.png') ==-1:
+        f.write(name)
+        f.write('\n')
 
 f.close()

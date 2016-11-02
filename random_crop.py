@@ -11,15 +11,16 @@ import argparse
 import numpy as np
 from PIL import Image
 from lib import flowlib as fl
+from lib import kittitool
 
 canvas_height = 540
 canvas_width = 960
-patch_height = 256
-patch_width = 256
+patch_height = 384
+patch_width = 512
 
-f1 = open('data/hazeinput/img1_list.txt', 'r')
-f2 = open('data/hazeinput/img2_list.txt', 'r')
-f = open('data/hazeinput/flo_list.txt', 'r')
+f1 = open('data/cleaninput/img1_list.txt', 'r')
+f2 = open('data/cleaninput/img2_list.txt', 'r')
+f = open('data/cleaninput/flo_list.txt', 'r')
 g1 = open('img1_list.txt', 'wb')
 g2 = open('img2_list.txt', 'wb')
 g = open('flo_list.txt', 'wb')
@@ -36,7 +37,10 @@ for i in range(600):
     y_locations = np.random.randint(0, canvas_height - patch_height, size=10)
     img1 = Image.open(img1_input[i].strip())
     img2 = Image.open(img2_input[i].strip())
-    flow = fl.read_flow(flow_input[i].strip())
+    if flow_input[i].strip().find('.png') != -1:
+        flow = kittitool.flow_read(flow_input[i].strip())
+    else:
+        flow = fl.read_flow(flow_input[i].strip())
     for (x, y) in zip(x_locations, y_locations):
         patch_img1 = img1.crop((x, y, x+patch_width, y+patch_height))
         patch_img2 = img2.crop((x,y,x+patch_width, y+patch_height))
