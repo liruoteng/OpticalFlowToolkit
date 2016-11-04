@@ -7,20 +7,50 @@ Date: 16 Oct 2016
 """
 
 import os
+import sys
 import argparse
 import numpy as np
 from PIL import Image
-from lib import flowlib as fl
 from lib import kittitool
+from lib import flowlib as fl
 
-canvas_height = 540
-canvas_width = 960
-patch_height = 384
+
+# hard code
+yellowpage = {'clean' : 'cleaninput', 'haze' : 'hazeinput', 
+              'rain' : 'raininput', 'kitti2012' : 'KITTI2012', 
+              'kitti2015' : 'KITTIinput', 'sintel' : 'Sintel'}
 patch_width = 512
+patch_height = 384
 
-f1 = open('data/cleaninput/img1_list.txt', 'r')
-f2 = open('data/cleaninput/img2_list.txt', 'r')
-f = open('data/cleaninput/flo_list.txt', 'r')
+# Parse Input
+parser = argparse.ArgumentParser(description="Image Crop Tool")
+parser.add_argument("dataset", type=str, help="image list of the data set to crop")
+parser.add_argument("length", type=int, help="the number of output crops to generate")
+args = parser.parse_args()
+
+# Read input
+foldername = yellowpage[args.dataset]
+f1 = open('data/' + foldername + '/img1_list.txt', 'r')
+f2 = open('data/' + foldername + '/img2_list.txt', 'r')
+f = open('data/' + foldername + '/flo_list.txt', 'r')
+params1 = f1.readline()
+params2 = f2.readline()
+params3 = f.readline()
+
+# sanity check
+if params1 == params2 == params3:
+    words = params1.split()
+    canvas_height = int(words[0])
+    canvas_width = int(words[1])
+    maximum_length = int(words[2])
+else:
+    print 'input files do not match!'
+    exit()
+
+if args.length <= maximum_length:
+    length = args.length
+
+# Prepare Output
 g1 = open('img1_list.txt', 'wb')
 g2 = open('img2_list.txt', 'wb')
 g = open('flo_list.txt', 'wb')
@@ -30,9 +60,9 @@ if not os.path.exists(output_dir):
 img1_input = f1.readlines()
 img2_input = f2.readlines()
 flow_input = f.readlines()
-length = len(flow_input)
 
-for i in range(600):
+# Generate
+for i in range(length):
     x_locations = np.random.randint(0, canvas_width - patch_width, size=10)
     y_locations = np.random.randint(0, canvas_height - patch_height, size=10)
     img1 = Image.open(img1_input[i].strip())
@@ -56,46 +86,10 @@ for i in range(600):
         g2.write(path2 + '\n')
         g.write(flow_path + '\n')
 
+# close the program
 f1.close()
 f2.close()
 f.close()
 g1.close()
 g2.close()
 g.close()
-
-
-
-
-'''
-
-file_list = []
-in_dir = os.path.abspath(args.input_dir)
-out_dir = os.path.abspath(args.output_dir)
-flow_count = 0
-image_count = 0
-for root, dirs, files in os.walk(in_dir):
-    if files:
-        for filename in files:
-            file_path = os.path.join(in_dir, root + '/' + filename)
-            if filename.find(args.flow_format) != -1:
-                # this is flow file
-                image_count += 1
-                print 'image count: ', image_count
-                flow = fl.read_flow(file_path)
-                new_flow = flow[args.y-1:args.y+args.h-1, args.x-1:args.x-1+args.w, :]
-                out_path = os.path.join(out_dir, root[root.find('drive/')+6:])
-                if not os.path.exists(out_path):
-                    os.makedirs(out_path)
-                fl.write_flow(new_flow, os.path.join(out_path, filename))
-            elif filename.find(args.image_format) != -1:
-                # this is an image file
-                flow_count += 1
-                print 'flow count: ', flow_count
-                img = Image.open(file_path)
-                new_img = img.crop((args.x-1, args.y-1, args.x+args.h-1, args.y+args.w-1))
-                out_path = os.path.join(out_dir, root[root.find('drive/')+6:])
-                if not os.path.exists(out_path):
-                    os.makedirs(out_path)
-                new_img.save(os.path.join(out_path, filename))
-
-'''
