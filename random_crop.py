@@ -16,9 +16,9 @@ from lib import flowlib as fl
 
 
 # hard code
-yellowpage = {'clean' : 'cleaninput', 'haze' : 'hazeinput', 
-              'rain' : 'raininput', 'kitti2012' : 'KITTI2012', 
-              'kitti2015' : 'KITTIinput', 'sintel' : 'Sintel'}
+yellowpage = {'clean' : 'drive_clean', 'haze' : 'drive_haze', 
+              'rain' : 'drive_rain', 'kitti2012' : 'KITTI2012', 
+              'kitti2015' : 'KITTI2015', 'sintel' : 'Sintel'}
 patch_width = 512
 patch_height = 384
 
@@ -37,9 +37,9 @@ if args.width:
     patch_width = args.width
 
 foldername = yellowpage[args.dataset]
-f1 = open('data/' + foldername + '/img1_list.txt', 'r')
-f2 = open('data/' + foldername + '/img2_list.txt', 'r')
-f = open('data/' + foldername + '/flo_list.txt', 'r')
+f1 = open('data/crop/' + foldername + '/img1_list.txt', 'r')
+f2 = open('data/crop/' + foldername + '/img2_list.txt', 'r')
+f = open('data/crop/' + foldername + '/flo_list.txt', 'r')
 params1 = f1.readline()
 params2 = f2.readline()
 params3 = f.readline()

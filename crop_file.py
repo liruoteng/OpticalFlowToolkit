@@ -1,6 +1,6 @@
 #!/usr/bin/python
 """
-crop_flow.py
+crop_file.py
 This file crops flow file (.flo) and image pairs into into patches according to the given locations
 Author: Li Ruoteng
 Date: 16 Oct 2016
