@@ -26,9 +26,16 @@ patch_height = 384
 parser = argparse.ArgumentParser(description="Image Crop Tool")
 parser.add_argument("dataset", type=str, help="image list of the data set to crop")
 parser.add_argument("length", type=int, help="the number of output crops to generate")
+parser.add_argument("--height", type=int, help="the height of the output patch")
+parser.add_argument("--width", type=int, help="the width of the output patch")
 args = parser.parse_args()
 
 # Read input
+if args.height:
+    patch_height = args.height
+if args.width:
+    patch_width = args.width
+
 foldername = yellowpage[args.dataset]
 f1 = open('data/' + foldername + '/img1_list.txt', 'r')
 f2 = open('data/' + foldername + '/img2_list.txt', 'r')

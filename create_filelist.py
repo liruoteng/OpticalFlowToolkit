@@ -18,7 +18,7 @@ args = parser.parse_args()
 
 file_list = []
 if not args.input_dir:
-    in_dir = './'
+    in_dir = os.path.abspath('./')
 else:
     in_dir = os.path.abspath(args.input_dir)
 
@@ -36,8 +36,7 @@ for root, dirs, files in os.walk(in_dir):
 
 file_list.sort()
 for name in file_list:
-    if name.find('0001.png') ==-1:
-        f.write(name)
-        f.write('\n')
+    f.write(name)
+    f.write('\n')
 
 f.close()
