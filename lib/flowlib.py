@@ -9,37 +9,22 @@
 """
 import png
 import pfm
+import scipy
 import numpy as np
+import matplotlib.colors as cl
 import matplotlib.pyplot as plt
+from PIL import Image
 
 
 UNKNOWN_FLOW_THRESH = 1e7
 SMALLFLOW = 0.0
 LARGEFLOW = 1e8
 
-
-def evaluate_flow_file(gt, pred):
-    """
-    evaluate the estimated optical flow end point error according to ground truth provided
-    :param gt: ground truth file path
-    :param pred: estimated optical flow file path
-    :return: end point error, float32
-    """
-    # Read flow files and calculate the errors
-    gt_flow = read_flow(gt)        # ground truth flow
-    eva_flow = read_flow(pred)     # predicted flow
-    # Calculate errors
-    average_pe = flow_error(gt_flow[:, :, 0], gt_flow[:, :, 1], eva_flow[:, :, 0], eva_flow[:, :, 1])
-    return average_pe
-
-
-def evaluate_flow(gt_flow, pred_flow):
-    """
-    gt: ground-truth flow
-    pred: estimated flow
-    """
-    average_pe = flow_error(gt_flow[:, :, 0], gt_flow[:, :, 1], pred_flow[:, :, 0], pred_flow[:, :, 1])
-    return average_pe
+"""
+=============
+Flow Section
+=============
+"""
 
 
 def show_flow(filename):
@@ -54,12 +39,54 @@ def show_flow(filename):
     plt.show()
 
 
-# WARNING: this will work on little-endian architectures (eg Intel x86) only!
+def visualize_flow(flow, mode='Y'):
+    """
+    this function visualize the input flow
+    :param flow: input flow in array
+    :param mode: choose which color mode to visualize the flow (Y: Ccbcr, RGB: RGB color)
+    :return: None
+    """
+    if mode == 'Y':
+        # Ccbcr color wheel
+        img = flow_to_image(flow)
+        plt.imshow(img)
+        plt.show()
+    elif mode == 'RGB':
+        (h, w) = flow.shape[0:2]
+        du = flow[:, :, 0]
+        dv = flow[:, :, 1]
+        valid = flow[:, :, 2]
+        max_flow = max(np.max(du), np.max(dv))
+        img = np.zeros((h, w, 3), dtype=np.float64)
+        # angle layer
+        img[:, :, 0] = np.arctan2(dv, du) / (2 * np.pi)
+        # magnitude layer, normalized to 1
+        img[:, :, 1] = np.sqrt(du * du + dv * dv) * 8 / max_flow
+        # phase layer
+        img[:, :, 2] = 8 - img[:, :, 1]
+        # clip to [0,1]
+        small_idx = img[:, :, 0:3] < 0
+        large_idx = img[:, :, 0:3] > 1
+        img[small_idx] = 0
+        img[large_idx] = 1
+        # convert to rgb
+        img = cl.hsv_to_rgb(img)
+        # remove invalid point
+        img[:, :, 0] = img[:, :, 0] * valid
+        img[:, :, 1] = img[:, :, 1] * valid
+        img[:, :, 2] = img[:, :, 2] * valid
+        # show
+        plt.imshow(img)
+        plt.show()
+
+    return None
+
+
 def read_flow(filename):
     """
-    read optical flow in Middlebury .flo file format
-    :param filename:
-    :return:
+    read optical flow from Middlebury .flo file
+    :param filename: name of the flow file
+    :return: optical flow data in matrix
     """
     f = open(filename, 'rb')
     magic = np.fromfile(f, np.float32, count=1)
@@ -76,6 +103,96 @@ def read_flow(filename):
         data2d = np.resize(data2d, (h, w, 2))
     f.close()
     return data2d
+
+
+def read_flow_png(flow_file):
+    """
+    Read optical flow from KITTI .png file
+    :param flow_file: name of the flow file
+    :return: optical flow data in matrix
+    """
+    flow_object = png.Reader(filename=flow_file)
+    flow_direct = flow_object.asDirect()
+    flow_data = list(flow_direct[2])
+    (w, h) = flow_direct[3]['size']
+    flow = np.zeros((h, w, 3), dtype=np.float64)
+    for i in range(len(flow_data)):
+        flow[i, :, 0] = flow_data[i][0::3]
+        flow[i, :, 1] = flow_data[i][1::3]
+        flow[i, :, 2] = flow_data[i][2::3]
+
+    invalid_idx = (flow[:, :, 2] == 0)
+    flow[:, :, 0:2] = (flow[:, :, 0:2] - 2 ** 15) / 64.0
+    flow[invalid_idx, 0] = 0
+    flow[invalid_idx, 1] = 0
+    return flow
+
+
+def read_flow_pfm(flow_file):
+    """
+    Read optical flow from .pfm file
+    :param flow_file: name of the flow file
+    :return: optical flow data in matrix
+    """
+    import pfm
+    (data, scale) = pfm.readPFM(flow_file)
+    return data
+
+
+def write_flow(flow, filename):
+    """
+    write optical flow in Middlebury .flo format
+    :param flow: optical flow map
+    :param filename: optical flow file path to be saved
+    :return: None
+    """
+    f = open(filename, 'wb')
+    magic = np.array([202021.25], dtype=np.float32)
+    (height, width) = flow.shape[0:2]
+    w = np.array([width], dtype=np.int32)
+    h = np.array([height], dtype=np.int32)
+    magic.tofile(f)
+    w.tofile(f)
+    h.tofile(f)
+    flow.tofile(f)
+    f.close()
+
+
+def segment_flow(flow):
+    h = flow.shape[0]
+    w = flow.shape[1]
+    u = flow[:, :, 0]
+    v = flow[:, :, 1]
+
+    idx = ((abs(u) > LARGEFLOW) | (abs(v) > LARGEFLOW))
+    idx2 = (abs(u) == SMALLFLOW)
+    class0 = (v == 0) & (u == 0)
+    u[idx2] = 0.00001
+    tan_value = v / u
+
+    class1 = (tan_value < 1) & (tan_value >= 0) & (u > 0) & (v >= 0)
+    class2 = (tan_value >= 1) & (u >= 0) & (v >= 0)
+    class3 = (tan_value < -1) & (u <= 0) & (v >= 0)
+    class4 = (tan_value < 0) & (tan_value >= -1) & (u < 0) & (v >= 0)
+    class8 = (tan_value >= -1) & (tan_value < 0) & (u > 0) & (v <= 0)
+    class7 = (tan_value < -1) & (u >= 0) & (v <= 0)
+    class6 = (tan_value >= 1) & (u <= 0) & (v <= 0)
+    class5 = (tan_value >= 0) & (tan_value < 1) & (u < 0) & (v <= 0)
+
+    seg = np.zeros((h, w))
+
+    seg[class1] = 1
+    seg[class2] = 2
+    seg[class3] = 3
+    seg[class4] = 4
+    seg[class5] = 5
+    seg[class6] = 6
+    seg[class7] = 7
+    seg[class8] = 8
+    seg[class0] = 0
+    seg[idx] = 0
+
+    return seg
 
 
 def flow_error(tu, tv, u, v):
@@ -173,6 +290,153 @@ def flow_to_image(flow):
     return np.uint8(img)
 
 
+def evaluate_flow_file(gt, pred):
+    """
+    evaluate the estimated optical flow end point error according to ground truth provided
+    :param gt: ground truth file path
+    :param pred: estimated optical flow file path
+    :return: end point error, float32
+    """
+    # Read flow files and calculate the errors
+    gt_flow = read_flow(gt)        # ground truth flow
+    eva_flow = read_flow(pred)     # predicted flow
+    # Calculate errors
+    average_pe = flow_error(gt_flow[:, :, 0], gt_flow[:, :, 1], eva_flow[:, :, 0], eva_flow[:, :, 1])
+    return average_pe
+
+
+def evaluate_flow(gt_flow, pred_flow):
+    """
+    gt: ground-truth flow
+    pred: estimated flow
+    """
+    average_pe = flow_error(gt_flow[:, :, 0], gt_flow[:, :, 1], pred_flow[:, :, 0], pred_flow[:, :, 1])
+    return average_pe
+
+
+"""
+==============
+Disparity Section
+==============
+"""
+
+
+def read_disp_png(file_name):
+    """
+    Read optical flow from KITTI .png file
+    :param file_name: name of the flow file
+    :return: optical flow data in matrix
+    """
+    image_object = png.Reader(filename=file_name)
+    image_direct = image_object.asDirect()
+    image_data = list(image_direct[2])
+    (w, h) = image_direct[3]['size']
+    channel = len(image_data[0]) / w
+    flow = np.zeros((h, w, channel), dtype=np.uint16)
+    for i in range(len(image_data)):
+        for j in range(channel):
+            flow[i, :, j] = image_data[i][j::channel]
+    return flow[:, :, 0] / 256
+
+
+def disp_to_flowfile(disp, filename):
+    """
+    Read KITTI disparity file in png format
+    :param disp: disparity matrix
+    :param filename: the flow file name to save
+    :return: None
+    """
+    f = open(filename, 'wb')
+    magic = np.array([202021.25], dtype=np.float32)
+    (height, width) = disp.shape[0:2]
+    w = np.array([width], dtype=np.int32)
+    h = np.array([height], dtype=np.int32)
+    empty_map = np.zeros((height, width), dtype=np.float32)
+    data = np.dstack((disp, empty_map))
+    magic.tofile(f)
+    w.tofile(f)
+    h.tofile(f)
+    data.tofile(f)
+    f.close()
+
+
+"""
+==============
+Image Section
+==============
+"""
+
+
+def read_image(filename):
+    """
+    Read normal image of any format
+    :param filename: name of the image file
+    :return: image data in matrix uint8 type
+    """
+    img = Image.open(filename)
+    im = np.array(img)
+    return im
+
+
+def warp_image(im, flow):
+    """
+    Use optical flow to warp image to the next
+    :param im: image to warp
+    :param flow: optical flow
+    :return: warped image
+    """
+    image_height = im.shape[0]
+    image_width = im.shape[1]
+    flow_height = flow.shape[0]
+    flow_width = flow.shape[1]
+    n = image_height * image_width
+    (iy, ix) = np.mgrid[0:image_height, 0:image_width]
+    (fy, fx) = np.mgrid[0:flow_height, 0:flow_width]
+    fx += flow[:,:,0]
+    fy += flow[:,:,1]
+    mask = fx <0 | fx > flow_width | fy < 0 | fy > flow_height
+    fx = np.min(np.max(fx, 0), flow_width)
+    fy = np.min(np.max(fy, 0), flow_height)
+    points = np.concatenate((ix.reshape(n,1), iy.reshape(n,1)), axis=1)
+    xi = np.concatenate((fx.reshape(n, 1), fy.reshape(n,1)), axis=1)
+    warp = np.zeros((image_height, image_width, im.shape[2]))
+    for i in range(im.shape[2]):
+        channel = im[:, :, i]
+        values = channel.reshape(n, 1)
+        new_channel = scipy.interpolate.griddata(points, values, xi, method='cubic')
+        new_channel[mask] = 1
+        warp[:, :, i] = new_channel
+    return warp
+
+
+"""
+==============
+Others
+==============
+"""
+
+def pfm_to_flo(pfm_file):
+    flow_filename = pfm_file[0:pfm_file.find('.pfm')] + '.flo'
+    (data, scale) = pfm.readPFM(pfm_file)
+    flow = data[:, :, 0:2]
+    write_flow(flow, flow_filename)
+
+
+def scale_image(image, new_range):
+    """
+    Linearly scale the image into desired range
+    :param image: input image
+    :param new_range: the new range to be aligned
+    :return: image normalized in new range
+    """
+    min_val = np.min(image).astype(np.float32)
+    max_val = np.max(image).astype(np.float32)
+    min_val_new = np.array(min(new_range), dtype=np.float32)
+    max_val_new = np.array(max(new_range), dtype=np.float32)
+    scaled_image = (image - min_val) / (max_val - min_val) * (max_val_new - min_val_new) + min_val_new
+    return scaled_image.astype(np.uint8)
+
+
 def compute_color(u, v):
     """
     compute optical flow color map
@@ -266,119 +530,3 @@ def make_color_wheel():
 
     return colorwheel
 
-
-def disp_to_flow(disp, filename):
-    f = open(filename, 'wb')
-    magic = np.array([202021.25], dtype=np.float32)
-    (height, width) = disp.shape[0:2]
-    w = np.array([width], dtype=np.int32)
-    h = np.array([height], dtype=np.int32)
-    empty_map = np.zeros((height, width), dtype=np.float32)
-    data = np.dstack((disp, empty_map))
-    magic.tofile(f)
-    w.tofile(f)
-    h.tofile(f)
-    data.tofile(f)
-    f.close()
-
-
-def write_flow(flow, filename):
-    """
-    write optical flow in Middlebury .flo format
-    :param flow: optical flow map
-    :param filename: optical flow file path to be saved
-    :return: None
-    """
-    f = open(filename, 'wb')
-    magic = np.array([202021.25], dtype=np.float32)
-    (height, width) = flow.shape[0:2]
-    w = np.array([width], dtype=np.int32)
-    h = np.array([height], dtype=np.int32)
-    magic.tofile(f)
-    w.tofile(f)
-    h.tofile(f)
-    flow.tofile(f)
-    f.close()
-
-
-def scale_image(image, new_range):
-    """
-    Linearly scale the image into desired range
-    :param image: input image
-    :param new_range: the new range to be aligned
-    :return: image normalized in new range
-    """
-    min_val = np.min(image).astype(np.float32)
-    max_val = np.max(image).astype(np.float32)
-    min_val_new = np.array(min(new_range), dtype=np.float32)
-    max_val_new = np.array(max(new_range), dtype=np.float32)
-    scaled_image = (image - min_val) / (max_val - min_val) * (max_val_new - min_val_new) + min_val_new
-    return scaled_image.astype(np.uint8)
-
-
-def read_png(flow_file):
-    """
-    Read kitti flow from .png file
-    :param flow_file:
-    :return:
-    """
-    image_object = png.Reader(filename=flow_file)
-    image_direct = image_object.asDirect()
-    image_data = list(image_direct[2])
-    (w, h) = image_direct[3]['size']
-    channel = len(image_data[0]) / w
-    flow = np.zeros((h, w, channel), dtype=np.uint16)
-    for i in range(len(image_data)):
-        for j in range(channel):
-            flow[i, :, j] = image_data[i][j::channel]
-    return flow[:, :, 0] / 256
-
-
-def read_pfm(flow_file):
-    import pfm
-    (data, scale) = pfm.readPFM(flow_file)
-    return data
-
-
-def pfm_to_flo(pfm_file):
-    flow_filename = pfm_file[0:pfm_file.find('.pfm')] + '.flo'
-    (data, scale) = pfm.readPFM(pfm_file)
-    flow = data[:, :, 0:2]
-    write_flow(flow, flow_filename)
-
-
-def flow_to_segment(flow):
-    h = flow.shape[0]
-    w = flow.shape[1]
-    u = flow[:, :, 0]
-    v = flow[:, :, 1]
-
-    idx = ((abs(u) > LARGEFLOW) | (abs(v) > LARGEFLOW))
-    idx2 = (abs(u) == SMALLFLOW)
-    class0 = (v == 0) & (u == 0)
-    u[idx2] = 0.00001
-    tan_value = v / u
-
-    class1 = (tan_value < 1) & (tan_value >= 0) & (u > 0) & (v >= 0)
-    class2 = (tan_value >= 1) & (u >= 0) & (v >= 0)
-    class3 = (tan_value < -1) & (u <= 0) & (v >= 0)
-    class4 = (tan_value < 0) & (tan_value >= -1) & (u < 0) & (v >= 0)
-    class8 = (tan_value >= -1) & (tan_value < 0) & (u > 0) & (v <= 0)
-    class7 = (tan_value < -1) & (u >= 0) & (v <= 0)
-    class6 = (tan_value >= 1) & (u <= 0) & (v <= 0)
-    class5 = (tan_value >= 0) & (tan_value < 1) & (u < 0) & (v <= 0)
-
-    seg = np.zeros((h, w))
-
-    seg[class1] = 1
-    seg[class2] = 2
-    seg[class3] = 3
-    seg[class4] = 4
-    seg[class5] = 5
-    seg[class6] = 6
-    seg[class7] = 7
-    seg[class8] = 8
-    seg[class0] = 0
-    seg[idx] = 0
-
-    return seg

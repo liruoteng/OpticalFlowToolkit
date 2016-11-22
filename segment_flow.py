@@ -27,6 +27,6 @@ if not os.path.exists(args.output_dir):
 for file_name in os.listdir(args.input_dir):
     if file_name.find(args.flow_format) != -1:
         flow = fl.read_flow(os.path.join(args.input_dir, file_name))
-        seg = fl.flow_to_segment(flow)
+        seg = fl.segment_flow(flow)
         seg_img = Image.fromarray(seg.astype(np.uint8))
         seg_img.save(os.path.join(args.output_dir, file_name[0:file_name.find(args.flow_format)] + '.png'))

@@ -7,18 +7,16 @@ Date: 16 Oct 2016
 """
 
 import os
-import sys
 import argparse
 import numpy as np
 from PIL import Image
 from lib import kittitool
 from lib import flowlib as fl
 
-
 # hard code
-yellowpage = {'clean' : 'drive_clean', 'haze' : 'drive_haze', 
-              'rain' : 'drive_rain', 'kitti2012' : 'KITTI2012', 
-              'kitti2015' : 'KITTI2015', 'sintel' : 'Sintel'}
+yellow_page = {'clean': 'drive_clean', 'haze': 'drive_haze',
+               'rain': 'drive_rain', 'kitti2012': 'KITTI2012',
+               'kitti2015': 'KITTI2015', 'sintel': 'Sintel'}
 patch_width = 512
 patch_height = 384
 
@@ -36,10 +34,10 @@ if args.height:
 if args.width:
     patch_width = args.width
 
-foldername = yellowpage[args.dataset]
-f1 = open('data/crop/' + foldername + '/img1_list.txt', 'r')
-f2 = open('data/crop/' + foldername + '/img2_list.txt', 'r')
-f = open('data/crop/' + foldername + '/flo_list.txt', 'r')
+folder_name = yellow_page[args.dataset]
+f1 = open('data/crop/' + folder_name + '/img1_list.txt', 'r')
+f2 = open('data/crop/' + folder_name + '/img2_list.txt', 'r')
+f = open('data/crop/' + folder_name + '/flo_list.txt', 'r')
 params1 = f1.readline()
 params2 = f2.readline()
 params3 = f.readline()
@@ -52,10 +50,13 @@ if params1 == params2 == params3:
     maximum_length = int(words[2])
 else:
     print 'input files do not match!'
-    exit()
+    raise
 
 if args.length <= maximum_length:
     length = args.length
+else:
+    print "exceed size of the dataset!"
+    raise
 
 # Prepare Output
 g1 = open('img1_list.txt', 'wb')
@@ -80,7 +81,7 @@ for i in range(length):
         flow = fl.read_flow(flow_input[i].strip())
     for (x, y) in zip(x_locations, y_locations):
         patch_img1 = img1.crop((x, y, x+patch_width, y+patch_height))
-        patch_img2 = img2.crop((x,y,x+patch_width, y+patch_height))
+        patch_img2 = img2.crop((x, y, x+patch_width, y+patch_height))
         patch_flow = flow[y:y+patch_height, x:x+patch_width]
         filename = str.format('%05d_' % i) + str(x) + '_' + str(y)
         path1 = os.path.join(output_dir, filename + '_img1.png')
