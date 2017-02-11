@@ -19,7 +19,7 @@ yellow_page = {'clean': 'drive_clean', 'haze': 'drive_haze',
                'kitti2015': 'KITTI2015', 'sintel': 'Sintel'}
 patch_width = 512
 patch_height = 384
-
+length = 600
 # Parse Input
 parser = argparse.ArgumentParser(description="Image Crop Tool")
 parser.add_argument("dataset", type=str, help="image list of the data set to crop")

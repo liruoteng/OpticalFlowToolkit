@@ -1,4 +1,4 @@
-384 512 17568
+540 960 17568
 ../../../data/drive/drive_cleanpass_aug/15mm_focallength/scene_backwards/fast/left/0002_rain.png
 ../../../data/drive/drive_cleanpass_aug/15mm_focallength/scene_backwards/fast/left/0003_rain.png
 ../../../data/drive/drive_cleanpass_aug/15mm_focallength/scene_backwards/fast/left/0004_rain.png
