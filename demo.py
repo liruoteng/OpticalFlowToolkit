@@ -6,9 +6,8 @@ Demo.py
 This file demonstrates how to use kittitool module to read
  and visualize flow file saved in kitti format .png
 """
-from lib import kittitool
+from lib import flowlib as fl
 
-flow_file = 'devkit/matlab/data/flow_gt.png'
-flow = kittitool.flow_read(flow_file)
-kittitool.flow_visualize(flow, 'Y')
-
+flow_file = 'data/example/flow_gt.png'
+flow = fl.read_flow_png(flow_file)
+fl.visualize_flow(flow, 'RGB')
