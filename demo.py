@@ -8,6 +8,14 @@ This file demonstrates how to use kittitool module to read
 """
 from lib import flowlib as fl
 
-flow_file = 'data/example/flow_gt.png'
-flow = fl.read_flow_png(flow_file)
-fl.visualize_flow(flow, 'RGB')
+# read kitti format optical flow file (.png)
+print "Visualizing KITTI flow example ..."
+flow_file_KITTI = 'data/example/KITTI/flow_gt.png'
+flow_KITTI = fl.read_flow_png(flow_file_KITTI)
+fl.visualize_flow(flow_KITTI, 'Y')  # 'RGB' for Ycbcr color mode
+
+# read Middlebury format optical flow file (.flo)
+print "Visualizing Middlebury flow example ..."
+flow_file_Middlebury = 'data/example/Middlebury/flow_gt.flo'
+flow_Middlebury = fl.read_flow(flow_file_Middlebury)
+fl.visualize_flow(flow_Middlebury)

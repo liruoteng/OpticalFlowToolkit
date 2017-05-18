@@ -9,7 +9,6 @@
 """
 import png
 import pfm
-import scipy
 import numpy as np
 import matplotlib.colors as cl
 import matplotlib.pyplot as plt
@@ -385,6 +384,7 @@ def warp_image(im, flow):
     :param flow: optical flow
     :return: warped image
     """
+    from scipy import interpolate
     image_height = im.shape[0]
     image_width = im.shape[1]
     flow_height = flow.shape[0]
@@ -394,19 +394,24 @@ def warp_image(im, flow):
     (fy, fx) = np.mgrid[0:flow_height, 0:flow_width]
     fx += flow[:,:,0]
     fy += flow[:,:,1]
-    mask = fx <0 | fx > flow_width | fy < 0 | fy > flow_height
-    fx = np.min(np.max(fx, 0), flow_width)
-    fy = np.min(np.max(fy, 0), flow_height)
+    mask = np.logical_or(fx <0 , fx > flow_width)
+    mask = np.logical_or(mask, fy < 0)
+    mask = np.logical_or(mask, fy > flow_height)
+    fx = np.minimum(np.maximum(fx, 0), flow_width)
+    fy = np.minimum(np.maximum(fy, 0), flow_height)
     points = np.concatenate((ix.reshape(n,1), iy.reshape(n,1)), axis=1)
     xi = np.concatenate((fx.reshape(n, 1), fy.reshape(n,1)), axis=1)
     warp = np.zeros((image_height, image_width, im.shape[2]))
     for i in range(im.shape[2]):
         channel = im[:, :, i]
+        plt.imshow(channel, cmap='gray')
         values = channel.reshape(n, 1)
-        new_channel = scipy.interpolate.griddata(points, values, xi, method='cubic')
+        new_channel = interpolate.griddata(points, values, xi, method='cubic')
+        new_channel = np.reshape(new_channel, [flow_height, flow_width])
         new_channel[mask] = 1
-        warp[:, :, i] = new_channel
-    return warp
+        warp[:, :, i] = new_channel.astype(np.uint8)
+
+    return warp.astype(np.uint8)
 
 
 """
