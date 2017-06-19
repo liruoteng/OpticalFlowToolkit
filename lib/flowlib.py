@@ -83,59 +83,20 @@ def visualize_flow(flow, mode='Y'):
 
 def read_flow(filename):
     """
-    read optical flow from Middlebury .flo file
+    read optical flow data from flow file
     :param filename: name of the flow file
-    :return: optical flow data in matrix
+    :return: optical flow data in numpy array
     """
-    f = open(filename, 'rb')
-    magic = np.fromfile(f, np.float32, count=1)
-    data2d = None
-
-    if 202021.25 != magic:
-        print 'Magic number incorrect. Invalid .flo file'
+    if filename.endswith('.flo'):
+        flow = read_flo_file(filename)
+    elif filename.endswith('.png'):
+        flow = read_png_file(filename)
+    elif filename.endswith('.pfm'):
+        flow = read_pfm_file(filename)
     else:
-        w = np.fromfile(f, np.int32, count=1)
-        h = np.fromfile(f, np.int32, count=1)
-        print "Reading %d x %d flo file" % (h, w)
-        data2d = np.fromfile(f, np.float32, count=2 * w * h)
-        # reshape data into 3D array (columns, rows, channels)
-        data2d = np.resize(data2d, (h[0], w[0], 2))
-    f.close()
-    return data2d
+        raise Exception('Invalid flow file format!')
 
-
-def read_flow_png(flow_file):
-    """
-    Read optical flow from KITTI .png file
-    :param flow_file: name of the flow file
-    :return: optical flow data in matrix
-    """
-    flow_object = png.Reader(filename=flow_file)
-    flow_direct = flow_object.asDirect()
-    flow_data = list(flow_direct[2])
-    (w, h) = flow_direct[3]['size']
-    flow = np.zeros((h, w, 3), dtype=np.float64)
-    for i in range(len(flow_data)):
-        flow[i, :, 0] = flow_data[i][0::3]
-        flow[i, :, 1] = flow_data[i][1::3]
-        flow[i, :, 2] = flow_data[i][2::3]
-
-    invalid_idx = (flow[:, :, 2] == 0)
-    flow[:, :, 0:2] = (flow[:, :, 0:2] - 2 ** 15) / 64.0
-    flow[invalid_idx, 0] = 0
-    flow[invalid_idx, 1] = 0
     return flow
-
-
-def read_flow_pfm(flow_file):
-    """
-    Read optical flow from .pfm file
-    :param flow_file: name of the flow file
-    :return: optical flow data in matrix
-    """
-    import pfm
-    (data, scale) = pfm.readPFM(flow_file)
-    return data
 
 
 def write_flow(flow, filename):
@@ -155,6 +116,29 @@ def write_flow(flow, filename):
     h.tofile(f)
     flow.tofile(f)
     f.close()
+
+
+def save_flow_image(flow, image_file):
+    """
+    save flow visualization into image file
+    :param flow: optical flow data
+    :param flow_fil
+    :return: None
+    """
+    flow_img = flow_to_image(flow)
+    img_out = Image.fromarray(flow_img)
+    img_out.save(image_file)
+
+
+def flowfile_to_imagefile(flow_file, image_file):
+    """
+    convert flowfile into image file
+    :param flow: optical flow data
+    :param flow_fil
+    :return: None
+    """
+    flow = read_flow(flow_file)
+    save_flow_image(flow, image_file)
 
 
 def segment_flow(flow):
@@ -289,16 +273,16 @@ def flow_to_image(flow):
     return np.uint8(img)
 
 
-def evaluate_flow_file(gt, pred):
+def evaluate_flow_file(gt_file, pred_file):
     """
     evaluate the estimated optical flow end point error according to ground truth provided
-    :param gt: ground truth file path
-    :param pred: estimated optical flow file path
+    :param gt_file: ground truth file path
+    :param pred_file: estimated optical flow file path
     :return: end point error, float32
     """
     # Read flow files and calculate the errors
-    gt_flow = read_flow(gt)        # ground truth flow
-    eva_flow = read_flow(pred)     # predicted flow
+    gt_flow = read_flow(gt_file)        # ground truth flow
+    eva_flow = read_flow(pred_file)     # predicted flow
     # Calculate errors
     average_pe = flow_error(gt_flow[:, :, 0], gt_flow[:, :, 1], eva_flow[:, :, 0], eva_flow[:, :, 1])
     return average_pe
@@ -534,4 +518,62 @@ def make_color_wheel():
     colorwheel[col:col+MR, 0] = 255
 
     return colorwheel
+
+
+def read_flo_file(filename):
+    """
+    Read from Middlebury .flo file
+    :param flow_file: name of the flow file
+    :return: optical flow data in matrix
+    """
+    f = open(filename, 'rb')
+    magic = np.fromfile(f, np.float32, count=1)
+    data2d = None
+
+    if 202021.25 != magic:
+        print 'Magic number incorrect. Invalid .flo file'
+    else:
+        w = np.fromfile(f, np.int32, count=1)
+        h = np.fromfile(f, np.int32, count=1)
+        print "Reading %d x %d flow file in .flo format" % (h, w)
+        data2d = np.fromfile(f, np.float32, count=2 * w * h)
+        # reshape data into 3D array (columns, rows, channels)
+        data2d = np.resize(data2d, (h[0], w[0], 2))
+    f.close()
+    return data2d
+
+
+def read_png_file(flow_file):
+    """
+    Read from KITTI .png file
+    :param flow_file: name of the flow file
+    :return: optical flow data in matrix
+    """
+    flow_object = png.Reader(filename=flow_file)
+    flow_direct = flow_object.asDirect()
+    flow_data = list(flow_direct[2])
+    (w, h) = flow_direct[3]['size']
+    print "Reading %d x %d flow file in .png format" % (h, w)
+    flow = np.zeros((h, w, 3), dtype=np.float64)
+    for i in range(len(flow_data)):
+        flow[i, :, 0] = flow_data[i][0::3]
+        flow[i, :, 1] = flow_data[i][1::3]
+        flow[i, :, 2] = flow_data[i][2::3]
+
+    invalid_idx = (flow[:, :, 2] == 0)
+    flow[:, :, 0:2] = (flow[:, :, 0:2] - 2 ** 15) / 64.0
+    flow[invalid_idx, 0] = 0
+    flow[invalid_idx, 1] = 0
+    return flow
+
+
+def read_pfm_file(flow_file):
+    """
+    Read from .pfm file
+    :param flow_file: name of the flow file
+    :return: optical flow data in matrix
+    """
+    import pfm
+    (data, scale) = pfm.readPFM(flow_file)
+    return data 
 

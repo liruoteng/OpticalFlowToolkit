@@ -11,8 +11,8 @@ from lib import flowlib as fl
 # read kitti format optical flow file (.png)
 print "Visualizing KITTI flow example ..."
 flow_file_KITTI = 'data/example/KITTI/flow_gt.png'
-flow_KITTI = fl.read_flow_png(flow_file_KITTI)
-fl.visualize_flow(flow_KITTI, 'Y')  # 'RGB' for Ycbcr color mode
+flow_KITTI = fl.read_flow(flow_file_KITTI)
+fl.visualize_flow(flow_KITTI) 
 
 # read Middlebury format optical flow file (.flo)
 print "Visualizing Middlebury flow example ..."
