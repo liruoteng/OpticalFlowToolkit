@@ -55,9 +55,17 @@ sudo pip install pypng
 python demo.py
 ```
 
-### 4. Scripts for Data Manipulation
+### 4. Scripts for Training Loss Visualization
+In your terminal, locate the root directory of this repository,  type the following 
+```
+cd scripts/
+python plot_loss.py <YOUR TRAINING LOG FILE>
+```
+The plot will be saved with the same name of your logfile in .png format.
 
-#### 4.1 random_crop.py
+### 5. Scripts for Data Manipulation
+
+#### 5.1 random_crop.py
 This program crops the original image data set into small patches specified by the input, by default the size is 384x512 (px). Please make sure that your input image is larger than the patches you want to get. The cropping distribution is uniform across the entire image.
 
 ```
@@ -68,24 +76,25 @@ The patches will be generated at <out> folder and the following files will be ge
 - img1_list.txt
 - img2_list.txt
 
-#### 4.2 create_filelist
+#### 5.2 create_filelist
 This program create three file lists that containing all the paths of the images/flow files from a dataset. The output of this program will be one single file "filelist.txt" that contains the file path you want to search in the dataset.
 
 ```
 python create_filelist.py <file_format> --input_dir <path_of_dataset> --output_dir <output_path>
 ```
 
-#### 4.3 crop_flow.py
+#### 5.3 crop_flow.py
 This program crops the image files and flow files from a dataset at a specific location. 
 
 ``` 
 python crop_flow.py <input_dir> <output_dir> <x> <y> <height_of_patch> <width_of_patch> --image_format <format_of_image> --flow_format <format_of_flow>
 
 ```
-#### 4.4 segment_flow.py
+#### 5.4 segment_flow.py
 This script segment the flow into 9 classes according to the flow orientation. Each 45 degree will be recognized into one class starting from 0 degree on x axis.
 
 ```
 python segment_flow.py <format_of_flowfile> <input_directory> --output_dir <output_directory>
 ```
+
 
