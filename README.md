@@ -1,6 +1,6 @@
 # OPTICAL FLOW TOOLKIT v0.1
 #### RUOTENG LI                                  
-#### 6th Aug 2016                                 
+#### 20 July 2016                                 
 
 
 This toolkit is a python implementation for read, write, calculate, and visualize
