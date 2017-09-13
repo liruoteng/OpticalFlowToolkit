@@ -577,3 +577,46 @@ def read_pfm_file(flow_file):
     (data, scale) = pfm.readPFM(flow_file)
     return data 
 
+
+# fast resample layer
+def resample(img, sz):
+    """
+    img: flow map to be resampled
+    sz: new flow map size. Must be [height,weight]
+    """
+    original_image_size = img.shape
+    in_height = img.shape[0]
+    in_width = img.shape[1]
+    out_height = sz[0]
+    out_width = sz[1]
+    out_flow = np.zeros((out_height, out_width, 2))
+    # find scale
+    height_scale =  float(in_height) / float(out_height)
+    width_scale =  float(in_width) / float(out_width)
+
+    [x,y] = np.meshgrid(range(out_width), range(out_height))
+    xx = x * width_scale
+    yy = y * height_scale
+    x0 = np.floor(xx).astype(np.int32)
+    x1 = x0 + 1
+    y0 = np.floor(yy).astype(np.int32)
+    y1 = y0 + 1
+
+    x0 = np.clip(x0,0,in_width-1)
+    x1 = np.clip(x1,0,in_width-1)
+    y0 = np.clip(y0,0,in_height-1)
+    y1 = np.clip(y1,0,in_height-1)
+
+    Ia = img[y0,x0,:]
+    Ib = img[y1,x0,:]
+    Ic = img[y0,x1,:]
+    Id = img[y1,x1,:]
+
+    wa = (y1-yy) * (x1-xx)
+    wb = (yy-y0) * (x1-xx)
+    wc = (y1-yy) * (xx-x0)
+    wd = (yy-y0) * (xx-x0)
+    out_flow[:,:,0] = (Ia[:,:,0]*wa + Ib[:,:,0]*wb + Ic[:,:,0]*wc + Id[:,:,0]*wd) * out_width / in_width
+    out_flow[:,:,1] = (Ia[:,:,1]*wa + Ib[:,:,1]*wb + Ic[:,:,1]*wc + Id[:,:,1]*wd) * out_height / in_height
+
+    return out_flow
