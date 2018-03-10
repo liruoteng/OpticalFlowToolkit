@@ -260,8 +260,6 @@ def flow_to_image(flow):
     rad = np.sqrt(u ** 2 + v ** 2)
     maxrad = max(-1, np.max(rad))
 
-    print "max flow: %.4f\nflow range:\nu = %.3f .. %.3f\nv = %.3f .. %.3f" % (maxrad, minu,maxu, minv, maxv)
-
     u = u/(maxrad + np.finfo(float).eps)
     v = v/(maxrad + np.finfo(float).eps)
 
@@ -533,11 +531,11 @@ def read_flo_file(filename):
     data2d = None
 
     if 202021.25 != magic:
-        print 'Magic number incorrect. Invalid .flo file'
+        print('Magic number incorrect. Invalid .flo file')
     else:
         w = np.fromfile(f, np.int32, count=1)
         h = np.fromfile(f, np.int32, count=1)
-        print "Reading %d x %d flow file in .flo format" % (h, w)
+        print("Reading %d x %d flow file in .flo format" % (h, w))
         data2d = np.fromfile(f, np.float32, count=2 * w * h)
         # reshape data into 3D array (columns, rows, channels)
         data2d = np.resize(data2d, (h[0], w[0], 2))
@@ -555,7 +553,7 @@ def read_png_file(flow_file):
     flow_direct = flow_object.asDirect()
     flow_data = list(flow_direct[2])
     (w, h) = flow_direct[3]['size']
-    print "Reading %d x %d flow file in .png format" % (h, w)
+    print("Reading %d x %d flow file in .png format" % (h, w))
     flow = np.zeros((h, w, 3), dtype=np.float64)
     for i in range(len(flow_data)):
         flow[i, :, 0] = flow_data[i][0::3]
