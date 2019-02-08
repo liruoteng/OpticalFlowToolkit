@@ -1,11 +1,24 @@
 #!/usr/bin/python
 """
-# ==============================
-# flowlib.py
-# library for optical flow processing
-# Author: Ruoteng Li
-# Date: 6th Aug 2016
-# ==============================
+Copyright (c) 2019 LI RUOTENG
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 """
 import png
 import pfm
@@ -206,14 +219,14 @@ def flow_error(tu, tv, u, v):
     sv[idxUnknow] = 0
 
     ind2 = [(np.absolute(stu) > smallflow) | (np.absolute(stv) > smallflow)]
-    index_su = su[ind2]
-    index_sv = sv[ind2]
+    index_su = su[tuple(ind2)]
+    index_sv = sv[tuple(ind2)]
     an = 1.0 / np.sqrt(index_su ** 2 + index_sv ** 2 + 1)
     un = index_su * an
     vn = index_sv * an
 
-    index_stu = stu[ind2]
-    index_stv = stv[ind2]
+    index_stu = stu[tuple(ind2)]
+    index_stv = stv[tuple(ind2)]
     tn = 1.0 / np.sqrt(index_stu ** 2 + index_stv ** 2 + 1)
     tun = index_stu * tn
     tvn = index_stv * tn
@@ -228,7 +241,7 @@ def flow_error(tu, tv, u, v):
     '''
 
     epe = np.sqrt((stu - su) ** 2 + (stv - sv) ** 2)
-    epe = epe[ind2]
+    epe = epe[tuple(ind2)]
     mepe = np.mean(epe)
     return mepe
 
